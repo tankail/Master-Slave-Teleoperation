@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Slave Controller for Dual Arms with Impedance Control (Unified) -->
+  
+  <!-- Master robot connection parameters -->
+  <arg name="master_ip" default="192.168.100.189"/>
+  <arg name="master_port" default="9090"/>
+  <arg name="enable_rosbridge" default="true"/>
+  <arg name="debug" default="false"/>
+
+  <!-- Impedance control parameters -->
+  <arg name="stiffness_kp" default="1.3"/>
+  <arg name="damping_kd" default="0.26"/>
+  <arg name="max_torque" default="10.0"/>
+  <arg name="control_rate" default="400"/>
+  <arg name="enable_feedforward" default="false"/>   <!-- 原来是false-->
+
+  <!-- ROS Bridge Relay Node for Dual Arms -->
+  <group if="$(arg enable_rosbridge)">
+    <node pkg="master_slaver_controller"
+          type="rosbridge_slaver_relay.py"
+          name="rosbridge_relay_dual_arms"
+          args="$(arg master_ip) $(arg master_port) dual_arms_joint_states"
+          output="screen"
+          respawn="true">
+      <param name="debug" value="$(arg debug)"/>
+    </node>
+  </group>
+
+  <!-- Load unified motor configuration for both arms -->
+  <rosparam file="$(find master_slaver_controller)/motor_cfg/pi_plus_arm_cfg.yaml" command="load" />
+
+  <!-- Dual Arms Impedance Controller Node -->
+  <node pkg="master_slaver_controller" 
+        name="dual_arms_impedance_controller" 
+        type="dual_arms_slaver_impedance" 
+        output="screen">
+    <param name="stiffness_kp" value="$(arg stiffness_kp)"/>
+    <param name="damping_kd" value="$(arg damping_kd)"/>
+    <param name="max_torque" value="$(arg max_torque)"/>
+    <param name="control_rate" value="$(arg control_rate)"/>
+    <param name="enable_feedforward" value="$(arg enable_feedforward)"/>
+  </node>
+
+</launch>

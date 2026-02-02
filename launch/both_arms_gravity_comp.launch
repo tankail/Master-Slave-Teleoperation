@@ -1,0 +1,59 @@
+<launch>
+    <!-- Both Arms Gravity Compensation System -->
+
+    <!-- Parameters -->
+    <arg name="urdf_path" default="$(find master_slaver_controller)/model/urdf_models/pi_plus_36dof_260107.urdf" />
+    <arg name="publish_rate" default="100" />
+    <arg name="control_rate" default="400" />
+    <arg name="compensation_scale" default="0.8" />
+    <arg name="enable_compensation" default="true" />
+    <arg name="torque_scale" default="1.0" />
+    <arg name="debug" default="false" />
+
+    <!-- Left Arm Group with Namespace -->
+    <group ns="left_arm">
+        <!-- Load motor configuration for left arm -->
+        <rosparam file="$(find master_slaver_controller)/motor_cfg/pi_plus_arm_cfg_l.yaml" command="load" />
+        
+        <!-- Left Arm Motor Controller Node -->
+        <node name="motor_controller" pkg="master_slaver_controller" type="left_arm_motor_controller" output="screen">
+            <param name="publish_rate" value="$(arg publish_rate)" />
+            <param name="control_rate" value="$(arg control_rate)" />
+            <param name="enable_gravity_comp" value="$(arg enable_compensation)" />
+            <param name="torque_scale" value="$(arg torque_scale)" />
+            <param name="debug" value="$(arg debug)" />
+        </node>
+
+        <!-- Left Arm Gravity Compensation Calculator Node -->
+        <node name="gravity_compensation" pkg="master_slaver_controller" type="left_arm_gravity_compensation_calc" output="screen">
+            <param name="urdf_path" value="$(arg urdf_path)" />
+            <param name="publish_rate" value="$(arg publish_rate)" />
+            <param name="enable_compensation" value="$(arg enable_compensation)" />
+            <param name="compensation_scale" value="$(arg compensation_scale)" />
+        </node>
+    </group>
+
+    <!-- Right Arm Group with Namespace -->
+    <group ns="right_arm">
+        <!-- Load motor configuration for right arm -->
+        <rosparam file="$(find master_slaver_controller)/motor_cfg/pi_plus_arm_cfg_r.yaml" command="load" />
+        
+        <!-- Right Arm Motor Controller Node -->
+        <node name="motor_controller" pkg="master_slaver_controller" type="right_arm_motor_controller" output="screen">
+            <param name="publish_rate" value="$(arg publish_rate)" />
+            <param name="control_rate" value="$(arg control_rate)" />
+            <param name="enable_gravity_comp" value="$(arg enable_compensation)" />
+            <param name="torque_scale" value="$(arg torque_scale)" />
+            <param name="debug" value="$(arg debug)" />
+        </node>
+
+        <!-- Right Arm Gravity Compensation Calculator Node -->
+        <node name="gravity_compensation" pkg="master_slaver_controller" type="right_arm_gravity_compensation_calc" output="screen">
+            <param name="urdf_path" value="$(arg urdf_path)" />
+            <param name="publish_rate" value="$(arg publish_rate)" />
+            <param name="enable_compensation" value="$(arg enable_compensation)" />
+            <param name="compensation_scale" value="$(arg compensation_scale)" />
+        </node>
+    </group>
+
+</launch>

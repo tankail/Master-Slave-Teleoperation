@@ -1,0 +1,33 @@
+<launch>
+    <!-- Dual Arms Gravity Compensation System (Unified) -->
+
+    <!-- Load unified motor configuration for both arms -->
+    <rosparam file="$(find master_slaver_controller)/motor_cfg/pi_plus_arm_cfg.yaml" command="load" />
+
+    <!-- Parameters -->
+    <arg name="urdf_path" default="$(find master_slaver_controller)/model/urdf_models/pi_plus_36dof_260107.urdf" />
+    <arg name="publish_rate" default="100" />
+    <arg name="control_rate" default="400" />
+    <arg name="compensation_scale" default="0.8" />
+    <arg name="enable_compensation" default="true" />
+    <arg name="torque_scale" default="1.0" />
+    <arg name="debug" default="false" />
+
+    <!-- Dual Arms Motor Controller Node -->
+    <node name="dual_arms_motor_controller" pkg="master_slaver_controller" type="dual_arms_motor_controller" output="screen">
+        <param name="publish_rate" value="$(arg publish_rate)" />
+        <param name="control_rate" value="$(arg control_rate)" />
+        <param name="enable_gravity_comp" value="$(arg enable_compensation)" />
+        <param name="torque_scale" value="$(arg torque_scale)" />
+        <param name="debug" value="$(arg debug)" />
+    </node>
+
+    <!-- Dual Arms Gravity Compensation Calculator Node -->
+    <node name="dual_arms_gravity_compensation" pkg="master_slaver_controller" type="dual_arms_gravity_compensation_calc" output="screen">
+        <param name="urdf_path" value="$(arg urdf_path)" />
+        <param name="publish_rate" value="$(arg publish_rate)" />
+        <param name="enable_compensation" value="$(arg enable_compensation)" />
+        <param name="compensation_scale" value="$(arg compensation_scale)" />
+    </node>
+
+</launch>

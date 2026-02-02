@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="master_ip" default="192.168.100.189"/>
+  <arg name="master_port" default="9090"/>
+  <arg name="topic_name" default="dual_arms_joint_states"/>
+  <arg name="debug" default="false"/>
+
+  <node pkg="master_slaver_controller" type="rosbridge_slaver_relay.py" name="rosbridge_slaver_relay"
+        args="$(arg master_ip) $(arg master_port) $(arg topic_name)" output="screen">
+    <param name="debug" value="$(arg debug)"/>
+  </node>
+
+</launch>

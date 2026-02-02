@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Slave Controller for Both Arms with Impedance Control -->
+  
+  <!-- Master robot connection parameters -->
+  <arg name="master_ip" default="192.168.100.189"/>
+  <arg name="master_port" default="9090"/>
+  <arg name="enable_rosbridge" default="true"/>
+  <arg name="debug" default="false"/>
+
+  <!-- Impedance control parameters -->
+  <arg name="stiffness_kp" default="1.0"/>
+  <arg name="damping_kd" default="0.2"/>
+  <arg name="max_torque" default="10.0"/>
+  <arg name="control_rate" default="400"/>
+  <arg name="enable_feedforward" default="false"/>
+
+  <!-- Left Arm Group with Namespace -->
+  <group ns="left_arm">
+    <!-- ROS Bridge Relay for Left Arm -->
+    <group if="$(arg enable_rosbridge)">
+      <node pkg="master_slaver_controller"
+            type="rosbridge_slaver_relay.py"
+            name="rosbridge_relay"
+            args="$(arg master_ip) $(arg master_port) master_controller_manipulator_left_state"
+            output="screen"
+            respawn="true">
+        <param name="debug" value="$(arg debug)"/>
+      </node>
+    </group>
+
+    <!-- Load motor configuration for left arm -->
+    <rosparam file="$(find master_slaver_controller)/motor_cfg/pi_plus_arm_cfg_l.yaml" command="load" />
+
+    <!-- Left Arm Impedance Controller Node -->
+    <node pkg="master_slaver_controller" 
+          name="impedance_controller" 
+          type="slaver_controller_manipulator_left_impedance" 
+          output="screen">
+      <param name="stiffness_kp" value="$(arg stiffness_kp)"/>
+      <param name="damping_kd" value="$(arg damping_kd)"/>
+      <param name="max_torque" value="$(arg max_torque)"/>
+      <param name="control_rate" value="$(arg control_rate)"/>
+      <param name="enable_feedforward" value="$(arg enable_feedforward)"/>
+    </node>
+  </group>
+
+  <!-- Right Arm Group with Namespace -->
+  <group ns="right_arm">
+    <!-- ROS Bridge Relay for Right Arm -->
+    <group if="$(arg enable_rosbridge)">
+      <node pkg="master_slaver_controller"
+            type="rosbridge_slaver_relay.py"
+            name="rosbridge_relay"
+            args="$(arg master_ip) $(arg master_port) master_controller_manipulator_right_state"
+            output="screen"
+            respawn="true">
+        <param name="debug" value="$(arg debug)"/>
+      </node>
+    </group>
+
+    <!-- Load motor configuration for right arm -->
+    <rosparam file="$(find master_slaver_controller)/motor_cfg/pi_plus_arm_cfg_r.yaml" command="load" />
+
+    <!-- Right Arm Impedance Controller Node -->
+    <node pkg="master_slaver_controller" 
+          name="impedance_controller" 
+          type="slaver_controller_manipulator_right_impedance" 
+          output="screen">
+      <param name="stiffness_kp" value="$(arg stiffness_kp)"/>
+      <param name="damping_kd" value="$(arg damping_kd)"/>
+      <param name="max_torque" value="$(arg max_torque)"/>
+      <param name="control_rate" value="$(arg control_rate)"/>
+      <param name="enable_feedforward" value="$(arg enable_feedforward)"/>
+    </node>
+  </group>
+
+</launch>
